@@ -219,8 +219,8 @@ int seq1(int timeout){
 
 	uint8_t led1 = 0, led2 = 0, led3 = 0, led4 = 0;
 
-	uint16_t start_time = millis;
-	while((timeout < 0) || (millis < (start_time + (uint16_t)timeout))){
+	uint64_t start_time = millis;
+	while((timeout < 0) || (millis < (start_time + (uint64_t)timeout))){
 		while(led1 < 255){
 			if(check_button_input()) return 1;
 			led1++;
@@ -282,8 +282,8 @@ int seq2(int timeout){
 	OCR1B = 0; // OC1B PB4 PIN 3
 	OCR1A = 0; // OC1A PB3 PIN 2
 
-	uint16_t start_time = millis;
-	while((timeout < 0) || (millis < (start_time + (uint16_t)timeout))){
+	uint64_t start_time = millis;
+	while((timeout < 0) || (millis < (start_time + (uint64_t)timeout))){
 		for(int j = 0; j < 255; j++){
 			if(check_button_input()) return 1;
 			OCR0A = j; // OC0A PB0 Pin 5
@@ -313,8 +313,8 @@ int seq3(int timeout){
 	OCR1B = 0; // OC1B PB4 PIN 3
 	OCR1A = 0; // OC1A PB3 PIN 2
 
-	uint16_t start_time = millis;
-	while((timeout < 0) || (millis < (start_time + (uint16_t)timeout))){
+	uint64_t start_time = millis;
+	while((timeout < 0) || (millis < (start_time + (uint64_t)timeout))){
 
 		for(int j = 0; j < 200; j+=2){
 			if(check_button_input()) return 1;
@@ -362,8 +362,8 @@ int seq4(int timeout){
 	OCR1B = 0; // OC1B PB4 PIN 3
 	OCR1A = 0; // OC1A PB3 PIN 2
 
-	uint16_t start_time = millis;
-	while((timeout < 0) || (millis < (start_time + (uint16_t)timeout))){
+	uint64_t start_time = millis;
+	while((timeout < 0) || (millis < (start_time + (uint64_t)timeout))){
 
 		for(int j = 0; j < 200; j+=2){
 			if(check_button_input()) return 1;
@@ -446,7 +446,7 @@ int seq5(int timeout){
 	OCR1B = 0; // OC1B PB4 PIN 3
 	OCR1A = 0; // OC1A PB3 PIN 2
 
-	uint16_t start_time = millis;
+	uint64_t start_time = millis;
 	for(int i = 0; i < 60; i++){
 		if(check_button_input()) return 1;
 		OCR0A = i; // OC0A PB0 Pin 5
@@ -456,7 +456,7 @@ int seq5(int timeout){
 		_delay_ms(2);
 	}
 
-	while((timeout < 0) || (millis < (start_time + (uint16_t)timeout))){
+	while((timeout < 0) || (millis < (start_time + (uint64_t)timeout))){
 		for(int i = 0; i < 100; i++){
 			if(check_button_input()) return 1;
 			_delay_ms(5);
@@ -554,8 +554,8 @@ int seq6(int timeout){
 	OCR1B = 0; // OC1B PB4 PIN 3
 	OCR1A = 0; // OC1A PB3 PIN 2
 	
-	uint16_t start_time = millis;
-	while((timeout < 0) || (millis < (start_time + (uint16_t)timeout))){
+	uint64_t start_time = millis;
+	while((timeout < 0) || (millis < (start_time + (uint64_t)timeout))){
 		for(int i = 0; i < 100; i++){
 			if(check_button_input()) return 1;
 			OCR0A += 2; // OC0A PB0 Pin 5
@@ -593,10 +593,10 @@ int seq7(int timeout){
 
 	init_mic_buffer();
 
-	uint16_t start_time = millis;
+	uint64_t start_time = millis;
 	uint8_t leds = 0;
 	uint16_t led_time = millis;
-	while((timeout < 0) || (millis < (start_time + (uint16_t)timeout))){
+	while((timeout < 0) || (millis < (start_time + (uint64_t)timeout))){
 		// update mic buffer
 		mic_buffer[mic_buffer_current] = adc_read(1);
 		mic_buffer_current++;
