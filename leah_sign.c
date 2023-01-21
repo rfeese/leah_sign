@@ -108,13 +108,14 @@ uint16_t get_mic_buffer_mad(){
 	return mad / MIC_BUFFER_SIZE;
 }
 
-// LED sequences
-void seq1(int timeout);
-void seq2(int timeout);
-void seq3(int timeout);
-void seq4(int timeout);
-void seq5(int timeout);
-void seq6(int timeout);
+// LED sequences return 1 if button pressed
+int seq1(int timeout);
+int seq2(int timeout);
+int seq3(int timeout);
+int seq4(int timeout);
+int seq5(int timeout);
+int seq6(int timeout);
+int seq7(int timeout);
 
 int main(){
 	init_mic_buffer();
@@ -148,18 +149,426 @@ int main(){
 
 
 	while (1) {
+
+		// demo mode -- cycle through sequences until button press
+		int button_pressed = 0;
+		while(!button_pressed){
+			if(!button_pressed)
+				button_pressed = seq1(5);
+
+			if(!button_pressed)
+				button_pressed = seq2(5);
+
+			if(!button_pressed)
+				button_pressed = seq3(5);
+
+			if(!button_pressed)
+				button_pressed = seq4(5);
+
+			if(!button_pressed)
+				button_pressed = seq5(5);
+
+			if(!button_pressed)
+				button_pressed = seq6(5);
+
+			if(!button_pressed)
+				button_pressed = seq7(5);
+		}
+
+		// stay on each cycle
 		seq1(-1);
-		seq6(-1);
 		seq2(-1);
 		seq3(-1);
 		seq4(-1);
 		seq5(-1);
+		seq6(-1);
+		seq7(-1);
 	}
 	return 0;
 }
 
+// fade all in and then out sequentially
+int seq1(int timeout){
+	OCR0A = 0; // OC0A PB0 Pin 5
+	OCR0B = 0; // OC0B PB1 Pin 6
+	OCR1B = 0; // OC1B PB4 PIN 3
+	OCR1A = 0; // OC1A PB3 PIN 2
+
+	uint8_t led1 = 0, led2 = 0, led3 = 0, led4 = 0;
+
+	while(timeout){
+		while(led1 < 255){
+			if(check_button_input()) return 1;
+			led1++;
+			OCR0A = led1; // OC0A PB0 Pin 5
+			_delay_ms(1);
+		}
+		while(led2 < 255){
+			if(check_button_input()) return 1;
+			led2++;
+			OCR0B = led2; // OC0B PB1 Pin 6
+			_delay_ms(1);
+		}
+		while(led3 < 255){
+			if(check_button_input()) return 1;
+			led3++;
+			OCR1B = led3; // OC1B PB4 PIN 3
+			_delay_ms(1);
+		}
+		while(led4 < 255){
+			if(check_button_input()) return 1;
+			led4++;
+			OCR1A = led4; // OC1A PB3 PIN 2
+			_delay_ms(1);
+		}
+
+		while(led1 > 0){
+			if(check_button_input()) return 1;
+			led1--;
+			OCR0A = led1; // OC0A PB0 Pin 5
+			_delay_ms(1);
+		}
+		while(led2 > 0){
+			if(check_button_input()) return 1;
+			led2--;
+			OCR0B = led2; // OC0B PB1 Pin 6
+			_delay_ms(1);
+		}
+		while(led3 > 0){
+			if(check_button_input()) return 1;
+			led3--;
+			OCR1B = led3; // OC1B PB4 PIN 3
+			_delay_ms(1);
+		}
+		while(led4 > 0){
+			if(check_button_input()) return 1;
+			led4--;
+			OCR1A = led4; // OC1A PB3 PIN 2
+			_delay_ms(1);
+		}
+
+		if(timeout > 0) timeout--;
+	}
+
+	return 0;
+}
+
+// fade all in and then all out
+int seq2(int timeout){
+	OCR0A = 0; // OC0A PB0 Pin 5
+	OCR0B = 0; // OC0B PB1 Pin 6
+	OCR1B = 0; // OC1B PB4 PIN 3
+	OCR1A = 0; // OC1A PB3 PIN 2
+
+	while(timeout){
+		for(int j = 0; j < 255; j++){
+			if(check_button_input()) return 1;
+			OCR0A = j; // OC0A PB0 Pin 5
+			OCR0B = j; // OC0B PB1 Pin 6
+			OCR1B = j; // OC1B PB4 PIN 3
+			OCR1A = j; // OC1A PB3 PIN 2
+			_delay_ms(1);
+		}
+		for(int j = 255; j >= 0; j--){
+			if(check_button_input()) return 1;
+			OCR0A = j; // OC0A PB0 Pin 5
+			OCR0B = j; // OC0B PB1 Pin 6
+			OCR1B = j; // OC1B PB4 PIN 3
+			OCR1A = j; // OC1A PB3 PIN 2
+			_delay_ms(1);
+		}
+		_delay_ms(100);
+
+		if(timeout > 0) timeout--;
+	}
+
+	return 0;
+}
+
+// chase first to last
+int seq3(int timeout){
+	OCR0A = 0; // OC0A PB0 Pin 5
+	OCR0B = 0; // OC0B PB1 Pin 6
+	OCR1B = 0; // OC1B PB4 PIN 3
+	OCR1A = 0; // OC1A PB3 PIN 2
+
+	while(timeout){
+
+		for(int j = 0; j < 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR0A = j; // OC0A PB0 Pin 5
+			// _delay_ms(1);
+		}
+
+		for(int j = 0; j <= 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR0A = 200 - j; // OC0A PB0 Pin 5
+			OCR0B = j; // OC0B PB1 Pin 6
+			// _delay_ms(1);
+		}
+
+		for(int j = 0; j <= 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR0B = 200 - j; // OC0B PB1 Pin 6
+			OCR1B = j; // OC1B PB4 PIN 3
+			// _delay_ms(1);
+		}
+
+		for(int j = 0; j <= 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR1B = 200 - j; // OC1B PB4 PIN 3
+			OCR1A = j; // OC1A PB3 PIN 2
+			// _delay_ms(1);
+		}
+
+		for(int j = 0; j <= 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR1A = 200 - j; // OC1A PB3 PIN 2
+			// _delay_ms(1);
+		}
+
+		_delay_ms(800);
+		
+		if(timeout > 0) timeout--;
+	}
+
+	return 0;
+}
+
+// chase first to last then last to first
+int seq4(int timeout){
+	OCR0A = 0; // OC0A PB0 Pin 5
+	OCR0B = 0; // OC0B PB1 Pin 6
+	OCR1B = 0; // OC1B PB4 PIN 3
+	OCR1A = 0; // OC1A PB3 PIN 2
+
+	while(timeout){
+
+		for(int j = 0; j < 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR0A = j; // OC0A PB0 Pin 5
+			// _delay_ms(1);
+		}
+
+		for(int j = 0; j <= 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR0A = 200 - j; // OC0A PB0 Pin 5
+			OCR0B = j; // OC0B PB1 Pin 6
+			// _delay_ms(1);
+		}
+
+		for(int j = 0; j <= 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR0B = 200 - j; // OC0B PB1 Pin 6
+			OCR1B = j; // OC1B PB4 PIN 3
+			// _delay_ms(1);
+		}
+
+		for(int j = 0; j <= 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR1B = 200 - j; // OC1B PB4 PIN 3
+			OCR1A = j; // OC1A PB3 PIN 2
+			// _delay_ms(1);
+		}
+
+		for(int j = 0; j <= 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR1A = 200 - j; // OC1A PB3 PIN 2
+			// _delay_ms(1);
+		}
+
+		_delay_ms(300);
+
+		for(int j = 0; j < 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR1A = j; // OC0A PB0 Pin 5
+			// _delay_ms(1);
+		}
+
+		for(int j = 0; j <= 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR1A = 200 - j; // OC0A PB0 Pin 5
+			OCR1B = j; // OC0B PB1 Pin 6
+			// _delay_ms(1);
+		}
+
+		for(int j = 0; j <= 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR1B = 200 - j; // OC0B PB1 Pin 6
+			OCR0B = j; // OC1B PB4 PIN 3
+			// _delay_ms(1);
+		}
+
+		for(int j = 0; j <= 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR0B = 200 - j; // OC1B PB4 PIN 3
+			OCR0A = j; // OC1A PB3 PIN 2
+			// _delay_ms(1);
+		}
+
+		for(int j = 0; j <= 200; j+=2){
+			if(check_button_input()) return 1;
+			OCR0A = 200 - j; // OC1A PB3 PIN 2
+			// _delay_ms(1);
+		}
+
+		_delay_ms(800);
+		
+		if(timeout > 0) timeout--;
+	}
+
+	return 0;
+}
+
+// emulate some type of analog brownouts, spikes, etc.
+int seq5(int timeout){
+	OCR0A = 0; // OC0A PB0 Pin 5
+	OCR0B = 0; // OC0B PB1 Pin 6
+	OCR1B = 0; // OC1B PB4 PIN 3
+	OCR1A = 0; // OC1A PB3 PIN 2
+
+	for(int i = 0; i < 60; i++){
+		if(check_button_input()) return 1;
+		OCR0A = i; // OC0A PB0 Pin 5
+		OCR0B = i; // OC0B PB1 Pin 6
+		OCR1B = i; // OC1B PB4 PIN 3
+		OCR1A = i; // OC1A PB3 PIN 2
+		_delay_ms(2);
+	}
+
+	while(timeout){
+		for(int i = 0; i < 100; i++){
+			if(check_button_input()) return 1;
+			_delay_ms(5);
+		}
+		for(int i = 0; i < 60; i++){
+			if(check_button_input()) return 1;
+			OCR0A--; // OC0A PB0 Pin 5
+			OCR0B--; // OC0B PB1 Pin 6
+			OCR1B--; // OC1B PB4 PIN 3
+			OCR1A--; // OC1A PB3 PIN 2
+			_delay_ms(3);
+		}
+		for(int i = 0; i < 60; i++){
+			if(check_button_input()) return 1;
+			OCR0A++; // OC0A PB0 Pin 5
+			OCR0B++; // OC0B PB1 Pin 6
+			OCR1B++; // OC1B PB4 PIN 3
+			OCR1A++; // OC1A PB3 PIN 2
+			_delay_ms(4);
+		}
+		for(int i = 0; i < 100; i++){
+			if(check_button_input()) return 1;
+			_delay_ms(10);
+		}
+		for(int i = 0; i < 40; i++){
+			if(check_button_input()) return 1;
+			OCR0A++; // OC0A PB0 Pin 5
+			OCR0B++; // OC0B PB1 Pin 6
+			OCR1B++; // OC1B PB4 PIN 3
+			OCR1A++; // OC1A PB3 PIN 2
+			_delay_ms(2);
+		}
+		for(int i = 0; i < 40; i++){
+			if(check_button_input()) return 1;
+			OCR0A--; // OC0A PB0 Pin 5
+			OCR0B--; // OC0B PB1 Pin 6
+			OCR1B--; // OC1B PB4 PIN 3
+			OCR1A--; // OC1A PB3 PIN 2
+			_delay_ms(2);
+		}
+		for(int i = 0; i < 30; i++){
+			if(check_button_input()) return 1;
+			OCR0A--; // OC0A PB0 Pin 5
+			OCR0B--; // OC0B PB1 Pin 6
+			OCR1B--; // OC1B PB4 PIN 3
+			OCR1A--; // OC1A PB3 PIN 2
+			_delay_ms(5);
+		}
+
+		for(int i = 0; i < 100; i++){
+			if(check_button_input()) return 1;
+			_delay_ms(20);
+		}
+		for(int i = 0; i < 30; i++){
+			if(check_button_input()) return 1;
+			OCR0A++; // OC0A PB0 Pin 5
+			OCR0B++; // OC0B PB1 Pin 6
+			OCR1B++; // OC1B PB4 PIN 3
+			OCR1A++; // OC1A PB3 PIN 2
+			_delay_ms(5);
+		}
+		for(int i = 0; i < 100; i++){
+			if(check_button_input()) return 1;
+			_delay_ms(30);
+		}
+		for(int i = 0; i < 40; i++){
+			if(check_button_input()) return 1;
+			OCR0A++; // OC0A PB0 Pin 5
+			OCR0B++; // OC0B PB1 Pin 6
+			OCR1B++; // OC1B PB4 PIN 3
+			OCR1A++; // OC1A PB3 PIN 2
+			_delay_ms(2);
+		}
+		for(int i = 0; i < 100; i++){
+			if(check_button_input()) return 1;
+			_delay_ms(20);
+		}
+		for(int i = 0; i < 40; i++){
+			if(check_button_input()) return 1;
+			OCR0A--; // OC0A PB0 Pin 5
+			OCR0B--; // OC0B PB1 Pin 6
+			OCR1B--; // OC1B PB4 PIN 3
+			OCR1A--; // OC1A PB3 PIN 2
+			_delay_ms(2);
+		}
+
+		if(timeout > 0) timeout--;
+	}
+
+	return 0;
+}
+
+// flash all and fade out
+int seq6(int timeout){
+	OCR0A = 0; // OC0A PB0 Pin 5
+	OCR0B = 0; // OC0B PB1 Pin 6
+	OCR1B = 0; // OC1B PB4 PIN 3
+	OCR1A = 0; // OC1A PB3 PIN 2
+	
+	while(timeout){
+		for(int i = 0; i < 100; i++){
+			if(check_button_input()) return 1;
+			OCR0A += 2; // OC0A PB0 Pin 5
+			OCR0B += 2; // OC0B PB1 Pin 6
+			OCR1B += 2; // OC1B PB4 PIN 3
+			OCR1A += 2; // OC1A PB3 PIN 2
+		}
+		for(int i = 0; i < 8; i++){
+			if(check_button_input()) return 1;
+			_delay_ms(1);
+		}
+		for(int i = 0; i < 200; i++){
+			if(check_button_input()) return 1;
+			OCR0A--; // OC0A PB0 Pin 5
+			OCR0B--; // OC0B PB1 Pin 6
+			OCR1B--; // OC1B PB4 PIN 3
+			OCR1A--; // OC1A PB3 PIN 2
+			_delay_ms(40);
+		}
+		for(int i = 0; i < 100; i++){
+			if(check_button_input()) return 1;
+			_delay_ms(10);
+		}
+
+		if(timeout > 0) timeout--;
+	}
+
+	return 0;
+}
+
 // flash lights when we hear sounds
-void seq6(int timeout){
+int seq7(int timeout){
 	OCR0A = 0; // OC0A PB0 Pin 5
 	OCR0B = 0; // OC0B PB1 Pin 6
 	OCR1B = 0; // OC1B PB4 PIN 3
@@ -204,280 +613,10 @@ void seq6(int timeout){
 				leds--;
 			}
 		}
-		if(check_button_input()) return;
+		if(check_button_input()) return 1;
+		if(timeout > 0) timeout--;
 	}
+
+	return 0;
 }
 
-// fade all in and then out sequentially
-void seq1(int timeout){
-	OCR0A = 0; // OC0A PB0 Pin 5
-	OCR0B = 0; // OC0B PB1 Pin 6
-	OCR1B = 0; // OC1B PB4 PIN 3
-	OCR1A = 0; // OC1A PB3 PIN 2
-
-	uint8_t led1 = 0, led2 = 0, led3 = 0, led4 = 0;
-
-	while(timeout){
-		while(led1 < 255){
-			if(check_button_input()) return;
-			led1++;
-			OCR0A = led1; // OC0A PB0 Pin 5
-			_delay_ms(1);
-		}
-		while(led2 < 255){
-			if(check_button_input()) return;
-			led2++;
-			OCR0B = led2; // OC0B PB1 Pin 6
-			_delay_ms(1);
-		}
-		while(led3 < 255){
-			if(check_button_input()) return;
-			led3++;
-			OCR1B = led3; // OC1B PB4 PIN 3
-			_delay_ms(1);
-		}
-		while(led4 < 255){
-			if(check_button_input()) return;
-			led4++;
-			OCR1A = led4; // OC1A PB3 PIN 2
-			_delay_ms(1);
-		}
-
-		while(led1 > 0){
-			if(check_button_input()) return;
-			led1--;
-			OCR0A = led1; // OC0A PB0 Pin 5
-			_delay_ms(1);
-		}
-		while(led2 > 0){
-			if(check_button_input()) return;
-			led2--;
-			OCR0B = led2; // OC0B PB1 Pin 6
-			_delay_ms(1);
-		}
-		while(led3 > 0){
-			if(check_button_input()) return;
-			led3--;
-			OCR1B = led3; // OC1B PB4 PIN 3
-			_delay_ms(1);
-		}
-		while(led4 > 0){
-			if(check_button_input()) return;
-			led4--;
-			OCR1A = led4; // OC1A PB3 PIN 2
-			_delay_ms(1);
-		}
-	}
-}
-
-// fade all in and then all out
-void seq2(int timeout){
-	OCR0A = 0; // OC0A PB0 Pin 5
-	OCR0B = 0; // OC0B PB1 Pin 6
-	OCR1B = 0; // OC1B PB4 PIN 3
-	OCR1A = 0; // OC1A PB3 PIN 2
-
-	while(timeout--){
-		for(int j = 0; j < 255; j++){
-			if(check_button_input()) return;
-			OCR0A = j; // OC0A PB0 Pin 5
-			OCR0B = j; // OC0B PB1 Pin 6
-			OCR1B = j; // OC1B PB4 PIN 3
-			OCR1A = j; // OC1A PB3 PIN 2
-			_delay_ms(2);
-		}
-		for(int j = 255; j >= 0; j--){
-			if(check_button_input()) return;
-			OCR0A = j; // OC0A PB0 Pin 5
-			OCR0B = j; // OC0B PB1 Pin 6
-			OCR1B = j; // OC1B PB4 PIN 3
-			OCR1A = j; // OC1A PB3 PIN 2
-			_delay_ms(2);
-		}
-		_delay_ms(100);
-	}
-}
-
-// chase first to last
-void seq3(int timeout){
-	OCR0A = 0; // OC0A PB0 Pin 5
-	OCR0B = 0; // OC0B PB1 Pin 6
-	OCR1B = 0; // OC1B PB4 PIN 3
-	OCR1A = 0; // OC1A PB3 PIN 2
-
-	for(int j = 0; j < 255; j++){
-		if(check_button_input()) return;
-		OCR0A = j; // OC0A PB0 Pin 5
-		_delay_ms(2);
-	}
-	while(timeout--){
-		for(int j = 0; j <= 255; j++){
-			if(check_button_input()) return;
-			OCR0A = 255 - j; // OC0A PB0 Pin 5
-			OCR0B = j; // OC0B PB1 Pin 6
-			_delay_ms(2);
-		}
-		for(int j = 0; j <= 255; j++){
-			if(check_button_input()) return;
-			OCR0B = 255 - j; // OC0B PB1 Pin 6
-			OCR1B = j; // OC1B PB4 PIN 3
-			_delay_ms(2);
-		}
-		for(int j = 0; j <= 255; j++){
-			if(check_button_input()) return;
-			OCR1B = 255 - j; // OC1B PB4 PIN 3
-			OCR1A = j; // OC1A PB3 PIN 2
-			_delay_ms(2);
-		}
-		for(int j = 0; j <= 255; j++){
-			if(check_button_input()) return;
-			OCR1A = 255 - j; // OC1A PB3 PIN 2
-			OCR0A = j; // OC0A PB0 Pin 5
-			_delay_ms(2);
-		}
-	}
-	for(int j = 0; j <= 255; j++){
-		if(check_button_input()) return;
-		OCR0A = 255 - j; // OC0A PB0 Pin 5
-		_delay_ms(2);
-	}
-}
-
-// emulate some type of analog brownouts, spikes, etc.
-void seq4(int timeout){
-	OCR0A = 0; // OC0A PB0 Pin 5
-	OCR0B = 0; // OC0B PB1 Pin 6
-	OCR1B = 0; // OC1B PB4 PIN 3
-	OCR1A = 0; // OC1A PB3 PIN 2
-
-	for(int i = 0; i < 60; i++){
-		if(check_button_input()) return;
-		OCR0A = i; // OC0A PB0 Pin 5
-		OCR0B = i; // OC0B PB1 Pin 6
-		OCR1B = i; // OC1B PB4 PIN 3
-		OCR1A = i; // OC1A PB3 PIN 2
-		_delay_ms(2);
-	}
-
-	while(1){
-		for(int i = 0; i < 100; i++){
-			if(check_button_input()) return;
-			_delay_ms(5);
-		}
-		for(int i = 0; i < 60; i++){
-			if(check_button_input()) return;
-			OCR0A--; // OC0A PB0 Pin 5
-			OCR0B--; // OC0B PB1 Pin 6
-			OCR1B--; // OC1B PB4 PIN 3
-			OCR1A--; // OC1A PB3 PIN 2
-			_delay_ms(3);
-		}
-		for(int i = 0; i < 60; i++){
-			if(check_button_input()) return;
-			OCR0A++; // OC0A PB0 Pin 5
-			OCR0B++; // OC0B PB1 Pin 6
-			OCR1B++; // OC1B PB4 PIN 3
-			OCR1A++; // OC1A PB3 PIN 2
-			_delay_ms(4);
-		}
-		for(int i = 0; i < 100; i++){
-			if(check_button_input()) return;
-			_delay_ms(10);
-		}
-		for(int i = 0; i < 40; i++){
-			if(check_button_input()) return;
-			OCR0A++; // OC0A PB0 Pin 5
-			OCR0B++; // OC0B PB1 Pin 6
-			OCR1B++; // OC1B PB4 PIN 3
-			OCR1A++; // OC1A PB3 PIN 2
-			_delay_ms(2);
-		}
-		for(int i = 0; i < 40; i++){
-			if(check_button_input()) return;
-			OCR0A--; // OC0A PB0 Pin 5
-			OCR0B--; // OC0B PB1 Pin 6
-			OCR1B--; // OC1B PB4 PIN 3
-			OCR1A--; // OC1A PB3 PIN 2
-			_delay_ms(2);
-		}
-		for(int i = 0; i < 30; i++){
-			if(check_button_input()) return;
-			OCR0A--; // OC0A PB0 Pin 5
-			OCR0B--; // OC0B PB1 Pin 6
-			OCR1B--; // OC1B PB4 PIN 3
-			OCR1A--; // OC1A PB3 PIN 2
-			_delay_ms(5);
-		}
-
-		for(int i = 0; i < 100; i++){
-			if(check_button_input()) return;
-			_delay_ms(20);
-		}
-		for(int i = 0; i < 30; i++){
-			if(check_button_input()) return;
-			OCR0A++; // OC0A PB0 Pin 5
-			OCR0B++; // OC0B PB1 Pin 6
-			OCR1B++; // OC1B PB4 PIN 3
-			OCR1A++; // OC1A PB3 PIN 2
-			_delay_ms(5);
-		}
-		for(int i = 0; i < 100; i++){
-			if(check_button_input()) return;
-			_delay_ms(30);
-		}
-		for(int i = 0; i < 40; i++){
-			if(check_button_input()) return;
-			OCR0A++; // OC0A PB0 Pin 5
-			OCR0B++; // OC0B PB1 Pin 6
-			OCR1B++; // OC1B PB4 PIN 3
-			OCR1A++; // OC1A PB3 PIN 2
-			_delay_ms(2);
-		}
-		for(int i = 0; i < 100; i++){
-			if(check_button_input()) return;
-			_delay_ms(20);
-		}
-		for(int i = 0; i < 40; i++){
-			if(check_button_input()) return;
-			OCR0A--; // OC0A PB0 Pin 5
-			OCR0B--; // OC0B PB1 Pin 6
-			OCR1B--; // OC1B PB4 PIN 3
-			OCR1A--; // OC1A PB3 PIN 2
-			_delay_ms(2);
-		}
-	}
-}
-
-// flash all and fade out
-void seq5(int timeout){
-	OCR0A = 0; // OC0A PB0 Pin 5
-	OCR0B = 0; // OC0B PB1 Pin 6
-	OCR1B = 0; // OC1B PB4 PIN 3
-	OCR1A = 0; // OC1A PB3 PIN 2
-	
-	while(1){
-		for(int i = 0; i < 100; i++){
-			if(check_button_input()) return;
-			OCR0A += 2; // OC0A PB0 Pin 5
-			OCR0B += 2; // OC0B PB1 Pin 6
-			OCR1B += 2; // OC1B PB4 PIN 3
-			OCR1A += 2; // OC1A PB3 PIN 2
-		}
-		for(int i = 0; i < 10; i++){
-			if(check_button_input()) return;
-			_delay_ms(1);
-		}
-		for(int i = 0; i < 200; i++){
-			if(check_button_input()) return;
-			OCR0A--; // OC0A PB0 Pin 5
-			OCR0B--; // OC0B PB1 Pin 6
-			OCR1B--; // OC1B PB4 PIN 3
-			OCR1A--; // OC1A PB3 PIN 2
-			_delay_ms(3);
-		}
-		for(int i = 0; i < 100; i++){
-			if(check_button_input()) return;
-			_delay_ms(20);
-		}
-	}
-}
