@@ -210,6 +210,17 @@ int main(){
 	return 0;
 }
 
+int delay_millis_check_button(int millisdelay){
+	int button_pressed = 0;
+
+	uint64_t start_time = millis;
+	while(millis < (start_time + millisdelay)){
+		if(check_button_input()) button_pressed = 1;
+	}
+
+	return button_pressed;
+}
+
 // fade all in and then out sequentially
 int seq1(int timeout){
 	OCR0A = 0; // OC0A PB0 Pin 5
@@ -300,7 +311,7 @@ int seq2(int timeout){
 			OCR1A = j; // OC1A PB3 PIN 2
 			_delay_ms(1);
 		}
-		_delay_ms(100);
+		if(delay_millis_check_button(100)) return 1;
 	}
 
 	return 0;
@@ -349,7 +360,7 @@ int seq3(int timeout){
 			// _delay_ms(1);
 		}
 
-		_delay_ms(800);
+		if(delay_millis_check_button(800)) return 1;
 	}
 
 	return 0;
@@ -398,7 +409,7 @@ int seq4(int timeout){
 			// _delay_ms(1);
 		}
 
-		_delay_ms(300);
+		if(delay_millis_check_button(300)) return 1;
 
 		for(int j = 0; j < 200; j+=2){
 			if(check_button_input()) return 1;
@@ -433,7 +444,7 @@ int seq4(int timeout){
 			// _delay_ms(1);
 		}
 
-		_delay_ms(800);
+		if(delay_millis_check_button(800)) return 1;
 	}
 
 	return 0;
