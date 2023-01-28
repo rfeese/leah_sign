@@ -139,6 +139,7 @@ int seq4(int timeout);
 int seq5(int timeout);
 int seq6(int timeout);
 int seq7(int timeout);
+int seq8(int timeout);
 
 int main(){
 	init_mic_buffer();
@@ -196,6 +197,8 @@ int main(){
 
 			if(!button_pressed)
 				button_pressed = seq7(5000);
+
+			// skip mic input seq in demo
 		}
 
 		// stay on each cycle
@@ -206,6 +209,7 @@ int main(){
 		seq5(-1);
 		seq6(-1);
 		seq7(-1);
+		seq8(-1);
 	}
 	return 0;
 }
@@ -360,7 +364,7 @@ int seq3(int timeout){
 			// _delay_ms(1);
 		}
 
-		if(delay_millis_check_button(800)) return 1;
+		if(delay_millis_check_button(100)) return 1;
 	}
 
 	return 0;
@@ -409,7 +413,7 @@ int seq4(int timeout){
 			// _delay_ms(1);
 		}
 
-		if(delay_millis_check_button(300)) return 1;
+		if(delay_millis_check_button(100)) return 1;
 
 		for(int j = 0; j < 200; j+=2){
 			if(check_button_input()) return 1;
@@ -444,7 +448,7 @@ int seq4(int timeout){
 			// _delay_ms(1);
 		}
 
-		if(delay_millis_check_button(800)) return 1;
+		if(delay_millis_check_button(100)) return 1;
 	}
 
 	return 0;
@@ -595,8 +599,69 @@ int seq6(int timeout){
 	return 0;
 }
 
-// flash lights when we hear sounds
+// fade letters in and out randomly
 int seq7(int timeout){
+	OCR0A = 0; // OC0A PB0 Pin 5
+	OCR0B = 0; // OC0B PB1 Pin 6
+	OCR1B = 0; // OC1B PB4 PIN 3
+	OCR1A = 0; // OC1A PB3 PIN 2
+
+	// led status (4 leds)
+	int8_t direction[4] = { 0, 0, 0, 0 };
+	uint8_t brightness[4] = { 0, 0, 0, 0 };
+
+	uint64_t start_time = millis;
+	while((timeout < 0) || (millis < (start_time + (uint64_t)timeout))){
+
+		if(check_button_input()) return 1;
+
+		// update leds
+		for(uint8_t i = 0; i < 4; i++){
+			// if inc but not max, inc
+			if((direction[i] > 0) && brightness[i] < 255){
+				brightness[i]++;
+				// if max, dec
+				if(brightness[i] >= 255){
+					brightness[i] = 255;
+					direction[i] = -1;
+				}
+			}
+			// if dec but not min, dec
+			else if(direction[i] < 0){
+				if(brightness[i] > 0){
+					brightness[i]--;
+				}
+				// if min, stop
+				if(brightness[i] <= 0){
+					brightness[i] = 0;
+					direction[i] = 0;
+				}
+			}
+		}
+
+
+		OCR0A = brightness[0];
+		OCR0B = brightness[1];
+		OCR1A = brightness[2];
+		OCR1B = brightness[3];
+
+
+		// chance of choosing an led
+		if((rand() % 50) == 0){
+			// choose random led
+			uint8_t led = (rand() % 4);
+			// if led not doing anything, make it light up
+			if(0 == direction[led]){
+				direction[led] = 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+// flash lights when we hear sounds
+int seq8(int timeout){
 	OCR0A = 0; // OC0A PB0 Pin 5
 	OCR0B = 0; // OC0B PB1 Pin 6
 	OCR1B = 0; // OC1B PB4 PIN 3
@@ -647,4 +712,3 @@ int seq7(int timeout){
 
 	return 0;
 }
-
