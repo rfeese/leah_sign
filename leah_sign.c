@@ -178,16 +178,16 @@ int main(){
 		int button_pressed = 0;
 		while(!button_pressed){
 			if(!button_pressed)
-				button_pressed = seq1(5000);
+				button_pressed = seq1(10000);
 
 			if(!button_pressed)
 				button_pressed = seq2(5000);
 
 			if(!button_pressed)
-				button_pressed = seq3(5000);
+				button_pressed = seq3(7000);
 
 			if(!button_pressed)
-				button_pressed = seq4(5000);
+				button_pressed = seq4(7000);
 
 			if(!button_pressed)
 				button_pressed = seq5(5000);
@@ -196,7 +196,7 @@ int main(){
 				button_pressed = seq6(5000);
 
 			if(!button_pressed)
-				button_pressed = seq7(5000);
+				button_pressed = seq7(10000);
 
 			// skip mic input seq in demo
 		}
