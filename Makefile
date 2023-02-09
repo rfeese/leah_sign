@@ -12,15 +12,17 @@ COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
 default:
 	# compile for attiny86 with warnings, optimizations, and 1 MHz clock frequency
 	$(COMPILE) -o leah_sign.o leah_sign.c
-	avr-objcopy -j .text -j .data -O ihex leah_sign.o leah_sign.hex
 	avr-size --format=avr --mcu=$(DEVICE) leah_sign.o
+	avr-objcopy -j .text -j .data -O ihex leah_sign.o leah_sign.hex
+	avr-objcopy -j .eeprom --change-section-lma .eeprom=0 -O ihex leah_sign.o leah_sign.eep
 
 fuse:
 	$(AVRDUDE) $(FUSES)
 
 flash:
 	$(AVRDUDE) -U flash:w:leah_sign.hex:i
+	$(AVRDUDE) -U eeprom:w:leah_sign.eep:i
 
 
 clean: /dev/null
-	- rm leah_sign.o leah_sign.hex
+	- rm leah_sign.o leah_sign.hex leah_sign.eep

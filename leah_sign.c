@@ -5,6 +5,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
+#include <avr/eeprom.h>
 #include <util/delay.h>
 #include <stdlib.h>
 
@@ -66,6 +67,20 @@ uint16_t adc_read(uint8_t ch){
   return (ADC);
 }
 
+/**
+ * Save and load settings from EEPROM
+ */
+uint8_t settings_start_seq_ee EEMEM = 0;
+uint8_t settings_start_seq = 0;
+
+void load_settings(){
+	settings_start_seq = eeprom_read_byte(&settings_start_seq_ee);
+}
+
+void save_settings(){
+	eeprom_update_byte(&settings_start_seq_ee, settings_start_seq);
+}
+
 // Using reset pin (1) as a button input.
 // Check for RESET going low (use voltage divider)
 // but not low enough to trigger actual reset (0.9 Vcc)
@@ -77,6 +92,21 @@ int check_button_input(){
 		if (adc_read(0) < 1000){
 			_delay_ms(3000);
 			if (adc_read(0) < 1000){
+				// blink the lights
+				for(int i = 0; i < 10; i++){
+					OCR0A = 255; // OC0A PB0 Pin 5
+					OCR0B = 255; // OC0B PB1 Pin 6
+					OCR1B = 255; // OC1B PB4 PIN 3
+					OCR1A = 255; // OC1A PB3 PIN 2
+					_delay_ms(50);
+					OCR0A = 0; // OC0A PB0 Pin 5
+					OCR0B = 0; // OC0B PB1 Pin 6
+					OCR1B = 0; // OC1B PB4 PIN 3
+					OCR1A = 0; // OC1A PB3 PIN 2
+					_delay_ms(50);
+				}
+				_delay_ms(2000);
+				save_settings();
 				reset();
 			}
 		}
@@ -131,6 +161,7 @@ uint16_t get_mic_buffer_mad(){
 	return mad / MIC_BUFFER_SIZE;
 }
 
+
 // LED sequences return 1 if button pressed, return after timeout millis
 int seq1(int timeout);
 int seq2(int timeout);
@@ -171,14 +202,26 @@ int main(){
 	// enable interrupts
 	sei();
 
+	load_settings();
+	uint8_t settings_start_seq_applied = 0;
 
 	while (1) {
 
 		// demo mode -- cycle through sequences until button press
 		int button_pressed = 0;
+		if(!settings_start_seq_applied){
+			if(settings_start_seq > 0){
+				button_pressed = 1;
+			}
+			else {
+				settings_start_seq_applied = 1;
+			}
+		}
 		while(!button_pressed){
+			settings_start_seq = 0;
+
 			if(!button_pressed)
-				button_pressed = seq1(10000);
+				button_pressed = seq1(8000);
 
 			if(!button_pressed)
 				button_pressed = seq2(5000);
@@ -202,14 +245,46 @@ int main(){
 		}
 
 		// stay on each cycle
-		seq1(-1);
-		seq2(-1);
-		seq3(-1);
-		seq4(-1);
-		seq5(-1);
-		seq6(-1);
-		seq7(-1);
-		seq8(-1);
+		if(settings_start_seq_applied || settings_start_seq < 2){
+			settings_start_seq_applied = 1;
+			settings_start_seq = 1;
+			seq1(-1);
+		}
+		if(settings_start_seq_applied || settings_start_seq < 3){
+			settings_start_seq_applied = 1;
+			settings_start_seq = 2;
+			seq2(-1);
+		}
+		if(settings_start_seq_applied || settings_start_seq < 4){
+			settings_start_seq_applied = 1;
+			settings_start_seq = 3;
+			seq3(-1);
+		}
+		if(settings_start_seq_applied || settings_start_seq < 5){
+			settings_start_seq_applied = 1;
+			settings_start_seq = 4;
+			seq4(-1);
+		}
+		if(settings_start_seq_applied || settings_start_seq < 6){
+			settings_start_seq_applied = 1;
+			settings_start_seq = 5;
+			seq5(-1);
+		}
+		if(settings_start_seq_applied || settings_start_seq < 7){
+			settings_start_seq_applied = 1;
+			settings_start_seq = 6;
+			seq6(-1);
+		}
+		if(settings_start_seq_applied || settings_start_seq < 8){
+			settings_start_seq_applied = 1;
+			settings_start_seq = 7;
+			seq7(-1);
+		}
+		if(settings_start_seq_applied || settings_start_seq < 9){
+			settings_start_seq_applied = 1;
+			settings_start_seq = 8;
+			seq8(-1);
+		}
 	}
 	return 0;
 }
