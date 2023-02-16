@@ -162,7 +162,9 @@ uint16_t get_mic_buffer_mad(){
 }
 
 
-// LED sequences return 1 if button pressed, return after timeout millis
+// function prototype for LED sequences
+// return 1 if button pressed, return after timeout millis
+typedef int (*led_sequence)(int timeout);
 int seq1(int timeout);
 int seq2(int timeout);
 int seq3(int timeout);
@@ -171,6 +173,8 @@ int seq5(int timeout);
 int seq6(int timeout);
 int seq7(int timeout);
 int seq8(int timeout);
+#define	NUM_SEQ 8
+led_sequence seq[NUM_SEQ] = {&seq1,&seq2,&seq3,&seq4,&seq5,&seq6,&seq7,&seq8};
 
 int main(){
 	init_mic_buffer();
@@ -220,28 +224,10 @@ int main(){
 		while(!button_pressed){
 			settings_start_seq = 0;
 
+			// random led sequence
+			uint8_t randseq = (rand() % NUM_SEQ);
 			if(!button_pressed)
-				button_pressed = seq1(8000);
-
-			if(!button_pressed)
-				button_pressed = seq2(5000);
-
-			if(!button_pressed)
-				button_pressed = seq3(7000);
-
-			if(!button_pressed)
-				button_pressed = seq4(7000);
-
-			if(!button_pressed)
-				button_pressed = seq5(5000);
-
-			if(!button_pressed)
-				button_pressed = seq6(5000);
-
-			if(!button_pressed)
-				button_pressed = seq7(10000);
-
-			// skip mic input seq in demo
+				button_pressed = seq[randseq](8000);
 		}
 
 		// stay on each cycle
