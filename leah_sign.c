@@ -173,8 +173,8 @@ int seq5(int timeout);
 int seq6(int timeout);
 int seq7(int timeout);
 int seq8(int timeout);
-#define	NUM_SEQ 8
-led_sequence seq[NUM_SEQ] = {&seq1,&seq2,&seq3,&seq4,&seq5,&seq6,&seq7,&seq8};
+#define	NUM_SEQ 7
+led_sequence seq[NUM_SEQ] = {&seq1,&seq2,&seq3,&seq4,&seq5,&seq6,&seq7};
 
 int main(){
 	init_mic_buffer();
